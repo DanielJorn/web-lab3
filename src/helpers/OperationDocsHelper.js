@@ -1,3 +1,5 @@
+import { gql } from "@apollo/client";
+
 export default class OperationDocsHelper {
   static getAllPokemons = () => `
   query MyQuery {
@@ -21,5 +23,13 @@ export default class OperationDocsHelper {
       affected_rows
     }
   }
+  `;
+  static SubscriptionAllPokemon = () => gql`
+    subscription MySubscription {
+      pokemons {
+        name
+        ability
+      }
+    }
   `;
 }
