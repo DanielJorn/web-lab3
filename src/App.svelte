@@ -4,10 +4,12 @@
   import { ApolloClient, InMemoryCache, HttpLink } from "@apollo/client";
   import { setClient, subscribe } from "svelte-apollo";
   import { WebSocketLink } from "@apollo/client/link/ws";
+  import { counter, errors } from "./store";
 
+  let online;
   function createApolloClient() {
     const wsLink = new WebSocketLink({
-      uri: "wss://web-laba-3.herokuapp.com/v1/graphql",
+      uri: WS_LINK,
       options: {
         reconnect: true,
       },
@@ -24,39 +26,52 @@
   const addPokemon = async () => {
     const name = prompt("Enter name: ") || "";
     const ability = prompt("Enter ability: ") || "";
-    await http.startExecuteMyMutation(
-      OperationDocsHelper.addOnePokemon(name, ability),
-    );
-    // pokemons.update(n=>[...n,{name,ability}])
+    try {
+      await http.startExecuteMyMutation(
+        OperationDocsHelper.addOnePokemon(name, ability),
+      );
+    } catch (e) {
+      console.error(e);
+      errors.set([e.message]);
+    }
   };
 
-  const deletePokemon = async () => {
-    const name = prompt("Enter name to delete: ") || "";
-    await http.startExecuteMyMutation(
-      OperationDocsHelper.deletePokemonsByName(name),
-    );
-    // pokemons.update(n=>n.filter(item => item.name!==name));
+  const deletePokemon = async (id) => {
+    try {
+      await http.startExecuteMyMutation(
+        OperationDocsHelper.deletePokemonsById(id),
+      );
+    } catch (e) {
+      console.error(e);
+      errors.set([e.message]);
+    }
   };
 </script>
 
+<svelte:window bind:online />
 <main>
-  {#if $subscribed.loading}
+  {#if !online}
+    <h1>No internet</h1>
+  {:else if $subscribed.loading || $counter !== 0}
     <h1>Loading</h1>
-  {:else if $subscribed.error}
+  {:else if $subscribed.error || $errors.length !== 0}
     <h1>Error</h1>
+    {$errors.join("\n")}
   {:else}
     <button on:click={addPokemon}>Add pokemon</button>
-    <button on:click={deletePokemon}>Delete pokemon</button>
     <table border="1">
       <thead>
         <th>name</th>
         <th>ability</th>
       </thead>
       <tbody>
-        {#each $subscribed.data.pokemons as pokemon}
+        {#each $subscribed.data.pokemons as pokemon (pokemon.id)}
           <tr>
             <th>{pokemon.name}</th>
             <th>{pokemon.ability}</th>
+            <button on:click={() => deletePokemon(pokemon.id)}
+              >Delete pokemon</button
+            >
           </tr>
         {/each}
       </tbody>

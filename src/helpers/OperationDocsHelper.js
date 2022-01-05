@@ -17,14 +17,15 @@ export default class OperationDocsHelper {
       insert_pokemons_one(object: {ability: "${ability}", name: "${name}"}) {
         ability
         name
+        id
       }
     }
     `;
   }
-  static deletePokemonsByName(name) {
+  static deletePokemonsById(id) {
     return `
     mutation MyMutation {
-      delete_pokemons(where: {name: {_eq: "${name}"}}) {
+      delete_pokemons(where: {id: {_eq: "${id}"}}) {
         affected_rows
       }
     }
@@ -34,6 +35,7 @@ export default class OperationDocsHelper {
     return gql`
       subscription MySubscription {
         pokemons {
+          id
           name
           ability
         }

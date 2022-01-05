@@ -1,18 +1,26 @@
+import { counter, errors } from "../store";
+
 class RequestHelper {
   constructor() {
-    this.API_URL = "https://web-laba-3.herokuapp.com/v1/graphql";
+    this.API_URL = HTTP_LINK;
   }
   async fetchGraphQL(operationsDoc, operationName, variables) {
-    const result = await fetch(this.API_URL, {
-      method: "POST",
-      body: JSON.stringify({
-        query: operationsDoc,
-        variables: variables,
-        operationName: operationName,
-      }),
-    });
+    try {
+      const result = await fetch(this.API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          query: operationsDoc,
+          variables: variables,
+          operationName: operationName,
+        }),
+      });
+      return result.json();
+    } catch (e) {
+      console.error(e);
+      counter.update((n) => n - 1);
 
-    return await result.json();
+      errors.set([e.message]);
+    }
   }
 
   fetchMyQuery(operationsDoc) {
@@ -20,11 +28,14 @@ class RequestHelper {
   }
 
   async startFetchMyQuery(operationsDoc) {
+    counter.update((n) => n + 1);
     const { errors, data } = await this.fetchMyQuery(operationsDoc);
+    counter.update((n) => n - 1);
 
     if (errors) {
       // handle those errors like a pro
       console.error(errors);
+      throw errors[0].message;
     }
 
     // do something great with this precious data
@@ -36,15 +47,19 @@ class RequestHelper {
   }
 
   async startExecuteMyMutation(operationsDoc) {
+    counter.update((n) => n + 1);
     const { errors, data } = await this.executeMyMutation(operationsDoc);
+    counter.update((n) => n - 1);
 
     if (errors) {
       // handle those errors like a pro
       console.error(errors);
+      throw errors[0].message;
     }
 
     // do something great with this precious data
     console.log(data);
+    return data;
   }
 }
 
