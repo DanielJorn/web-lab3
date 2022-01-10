@@ -17,9 +17,7 @@ class RequestHelper {
       return result.json();
     } catch (e) {
       console.error(e);
-      counter.update((n) => n - 1);
-
-      errors.set([e.message]);
+      $errors = [e.message];
     }
   }
 
@@ -29,13 +27,13 @@ class RequestHelper {
 
   async startFetchMyQuery(operationsDoc) {
     counter.update((n) => n + 1);
-    const { errors, data } = await this.fetchMyQuery(operationsDoc);
+    const { errors: errs, data } = await this.fetchMyQuery(operationsDoc);
     counter.update((n) => n - 1);
 
-    if (errors) {
+    if (errs) {
       // handle those errors like a pro
-      console.error(errors);
-      throw errors[0].message;
+      console.error(errs);
+      throw errs[0].message;
     }
 
     // do something great with this precious data
@@ -48,13 +46,13 @@ class RequestHelper {
 
   async startExecuteMyMutation(operationsDoc) {
     counter.update((n) => n + 1);
-    const { errors, data } = await this.executeMyMutation(operationsDoc);
+    const { errors: errs, data } = await this.executeMyMutation(operationsDoc);
     counter.update((n) => n - 1);
 
-    if (errors) {
+    if (errs) {
       // handle those errors like a pro
-      console.error(errors);
-      throw errors[0].message;
+      console.error(errs);
+      throw errs[0].message;
     }
 
     // do something great with this precious data
