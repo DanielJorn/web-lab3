@@ -17,6 +17,7 @@ class RequestHelper {
       return result.json();
     } catch (e) {
       console.error(e);
+      counter.update((n) => n - 1);
       $errors = [e.message];
     }
   }
